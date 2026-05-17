@@ -13,7 +13,7 @@ st.set_page_config(
 # Load Data
 @st.cache_data
 def load_data():
-    return pd.read_csv("data_clean.csv")
+    return pd.read_csv("dashboard/data_clean.csv")
 
 
 df = load_data()
@@ -62,7 +62,12 @@ st.markdown("---")
 # --- KPI METRICS ---
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Total Pelanggan", f"{total_cust:,}")
-col2.metric("Churn Rate", f"{churn_rate:.2f}%", delta_color="inverse")
+col2.metric(
+    "Pelanggan Churn",
+    f"{churned:,}",
+    delta=f"{churn_rate:.1f}% churn rate",
+    delta_color="inverse",
+)
 col3.metric("Rata-rata Transaksi", f"${dff['total_trans_amt'].mean():,.0f}")
 col4.metric("Rata-rata Usia", f"{dff['customer_age'].mean():.1f} thn")
 
@@ -102,6 +107,10 @@ with tab1:
         st.info(
             "💡 Kategori Platinum memiliki tingkat churn proporsional tertinggi meskipun Blue Card memiliki volume terbanyak."
         )
+        st.warning(
+            "📌 **Kesimpulan Q1:** Blue Card **tidak terbukti** memiliki churn 50% lebih tinggi. "
+            "Secara proporsional: Platinum 25% > Gold 18.1% > Blue 16.1% > Silver 14.8%."
+        )
 
     with col_b:
         st.subheader("Q2: Pengaruh Nominal Transaksi")
@@ -139,16 +148,22 @@ with tab1:
         )
         st.plotly_chart(fig_trans, use_container_width=True)
         st.info(
-            "💡 Customer dengan transaksi di bawah $2500 memiliki risiko churn 4x lipat lebih tinggi."
+            "Customer dengan transaksi di bawah \$2500 memiliki risiko churn 2x lebih tinggi dibanding kelompok \$5000+."
+        )
+        st.warning(
+            "📌 **Kesimpulan Q2:** Churn \$0–2500 (30.84%) vs \$5000+ (13.57%), selisih 17.27% — "
+            "tidak mencapai target 40% yang dihipotesiskan, namun tren pengaruhnya terbukti signifikan."
         )
 
 with tab2:
+    churned_df = dff[dff["attrition_flag"] == "Attrited Customer"]
+
     col_c, col_d = st.columns(2)
 
     with col_c:
         st.subheader("Distribusi Churn by Gender")
         fig_gen = px.pie(
-            dff[dff["attrition_flag"] == "Attrited Customer"],
+            churned_df,
             names="gender",
             hole=0.4,
             color_discrete_sequence=px.colors.qualitative.Pastel,
@@ -168,3 +183,63 @@ with tab2:
             },
         )
         st.plotly_chart(fig_inact, use_container_width=True)
+
+    # Baris tambahan: Income Category & Age Group
+    col_e, col_f = st.columns(2)
+
+    with col_e:
+        st.subheader("Churn by Income Category")
+        inc_pct = (
+            churned_df["income_category"].value_counts(normalize=True).reset_index()
+        )
+        inc_pct.columns = ["Income", "Persentase"]
+        inc_pct["Persentase"] *= 100
+        fig_inc = px.bar(
+            inc_pct.sort_values("Persentase"),
+            x="Persentase",
+            y="Income",
+            orientation="h",
+            text_auto=".1f",
+            labels={"Persentase": "% dari Total Churn", "Income": "Kategori Income"},
+            color_discrete_sequence=[CHURN_COLOR],
+        )
+        fig_inc.update_layout(showlegend=False)
+        st.plotly_chart(fig_inc, use_container_width=True)
+
+    with col_f:
+        st.subheader("Churn Rate per Kelompok Usia")
+        dff_age = dff.copy()
+        dff_age["Kelompok Usia"] = pd.cut(
+            dff_age["customer_age"],
+            bins=[25, 35, 45, 55, 65, 100],
+            labels=["26-35", "36-45", "46-55", "56-65", "66+"],
+        )
+        age_data = (
+            dff_age.groupby(["Kelompok Usia", "attrition_flag"], observed=False)
+            .size()
+            .reset_index(name="count")
+        )
+        age_data["pct"] = (
+            age_data["count"]
+            / age_data.groupby("Kelompok Usia")["count"].transform("sum")
+            * 100
+        )
+        fig_age = px.bar(
+            age_data,
+            x="Kelompok Usia",
+            y="pct",
+            color="attrition_flag",
+            barmode="group",
+            text_auto=".1f",
+            color_discrete_map={
+                "Existing Customer": RETAINED_COLOR,
+                "Attrited Customer": CHURN_COLOR,
+            },
+            labels={"pct": "Proporsi (%)", "attrition_flag": "Status"},
+        )
+        fig_age.update_layout(legend_title="Status")
+        st.plotly_chart(fig_age, use_container_width=True)
+
+    st.info(
+        "💡 Perempuan lebih banyak churn (57.2%). Income <$40K tertinggi (37.6%). Kelompok usia 46–55 tahun paling rentan churn (42.3%)."
+    )
