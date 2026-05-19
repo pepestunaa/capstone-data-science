@@ -52,14 +52,14 @@ total_cust = len(dff)
 churned = (dff["attrition_flag"] == "Attrited Customer").sum()
 churn_rate = (churned / total_cust * 100) if total_cust > 0 else 0
 
-# --- HEADER ---
+# HEADER
 st.title("🏦 Bank Customer Churn Executive Dashboard")
 st.markdown(
     f"Analisis profil risiko dan perilaku transaksi pelanggan. | Total Data Terfilter: **{total_cust:,}**"
 )
 st.markdown("---")
 
-# --- KPI METRICS ---
+# KPI METRICS
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Total Pelanggan", f"{total_cust:,}")
 col2.metric(
@@ -73,7 +73,7 @@ col4.metric("Rata-rata Usia", f"{dff['customer_age'].mean():.1f} thn")
 
 st.markdown("---")
 
-# --- VISUALISASI JAWABAN PERTANYAAN BISNIS ---
+# VISUALISASI JAWABAN PERTANYAAN BISNIS
 tab1, tab2 = st.tabs(["📊 Analisis Strategis", "👥 Profil Demografi"])
 
 with tab1:
@@ -105,10 +105,10 @@ with tab1:
         )
         st.plotly_chart(fig_card, use_container_width=True)
         st.info(
-            "💡 Kategori Platinum memiliki tingkat churn proporsional tertinggi meskipun Blue Card memiliki volume terbanyak."
+            "Kategori Platinum memiliki tingkat churn proporsional tertinggi meskipun Blue Card memiliki volume terbanyak."
         )
         st.warning(
-            "📌 **Kesimpulan Q1:** Blue Card **tidak terbukti** memiliki churn 50% lebih tinggi. "
+            "**Kesimpulan Q1:** Blue Card **tidak terbukti** memiliki churn 50% lebih tinggi. "
             "Secara proporsional: Platinum 25% > Gold 18.1% > Blue 16.1% > Silver 14.8%."
         )
 
@@ -151,7 +151,7 @@ with tab1:
             "Customer dengan transaksi di bawah \$2500 memiliki risiko churn 2x lebih tinggi dibanding kelompok \$5000+."
         )
         st.warning(
-            "📌 **Kesimpulan Q2:** Churn \$0–2500 (30.84%) vs \$5000+ (13.57%), selisih 17.27% — "
+            "**Kesimpulan Q2:** Churn \$0–2500 (30.84%) vs \$5000+ (13.57%), selisih 17.27% — "
             "tidak mencapai target 40% yang dihipotesiskan, namun tren pengaruhnya terbukti signifikan."
         )
 
@@ -241,5 +241,5 @@ with tab2:
         st.plotly_chart(fig_age, use_container_width=True)
 
     st.info(
-        "💡 Perempuan lebih banyak churn (57.2%). Income <$40K tertinggi (37.6%). Kelompok usia 46–55 tahun paling rentan churn (42.3%)."
+        "Perempuan lebih banyak churn (57.2%). Income <$40K tertinggi (37.6%). Kelompok usia 46–55 tahun paling rentan churn (42.3%)."
     )
