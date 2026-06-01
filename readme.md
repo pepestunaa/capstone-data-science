@@ -1,4 +1,4 @@
-# Capstone Data Science
+### Capstone Data Science
 
 install
 
@@ -9,8 +9,6 @@ pip install -r requirements.txt
 streamlit run dashboard/dashboard.py
 ```
 
-OR 
+or 
 
-Access the deployed app
-
-https://capstone-data-science-ofcsxpup5cenjx5tzjwkue.streamlit.app/
+access the deployed app: `https://capstone-data-science-ofcsxpup5cenjx5tzjwkue.streamlit.app/`
