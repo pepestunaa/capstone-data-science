@@ -9,6 +9,4 @@ pip install -r requirements.txt
 streamlit run dashboard/dashboard.py
 ```
 
-or 
-
-access the deployed app: `https://capstone-data-science-ofcsxpup5cenjx5tzjwkue.streamlit.app/`
+or access the deployed app in [here](https://capstone-data-science-ofcsxpup5cenjx5tzjwkue.streamlit.app/)
